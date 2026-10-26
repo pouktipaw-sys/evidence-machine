@@ -1,5 +1,7 @@
 # The Evidence Machine — candidature de Morjiane Aït Mokhtar
 
+En ligne : https://pouktipaw-sys.github.io/evidence-machine/ (GitHub Pages) · déployé aussi sur Vercel à chaque push sur `main`.
+
 Site-installation : une typographie monumentale mène, au scroll, au dashboard FlowState AI, puis à une salle d’enquête interactive.
 
 ```bash
