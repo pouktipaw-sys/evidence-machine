@@ -58,7 +58,7 @@ export function Finale() {
             <p className="fin__tag">{person.tagline}</p>
             <div className="fin__ctas">
               <a className="btn btn--primary magnetic fin__main" href={links.contact} data-cursor="OPEN">
-                Discuss my application <i aria-hidden="true">→</i>
+                Parlons de ma candidature <i aria-hidden="true">→</i>
               </a>
               <a className="btn btn--ghost magnetic" href={links.flowstate} data-cursor="OPEN">
                 Ouvrir FlowState AI
@@ -71,7 +71,7 @@ export function Finale() {
         </div>
         <footer className="fin__foot">
           <span>© 2026 {person.name}</span>
-          <span>Conçu et codé à la main · React · GSAP</span>
+          <span>Conçu avec Claude Code · React · GSAP</span>
           <span className="fin__egg">
             Tapez <kbd>b</kbd> <kbd>u</kbd> <kbd>i</kbd> <kbd>l</kbd> <kbd>d</kbd>
           </span>
