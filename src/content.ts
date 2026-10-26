@@ -7,14 +7,14 @@
 export const person = {
   name: 'Morjiane Aït Mokhtar',
   nameUpper: 'MORJIANE AÏT MOKHTAR',
-  tagline: 'Développeuse, experte Claude et ChatGPT.',
+  tagline: 'Développeuse · IA agentique · Claude Code & MCP.',
   email: 'morjiane.aitm@gmail.com',
   city: 'Lyon',
 }
 
 export const links = {
   // TODO: remplacer par l'adresse de contact réelle
-  contact: 'mailto:morjiane.aitm@gmail.com?subject=Candidature%20Smalk%20%E2%80%94%20Morjiane',
+  contact: 'mailto:morjiane.aitm@gmail.com?subject=Candidature%20Taly%20%E2%80%94%20Morjiane',
   // l'application FlowState AI (démo intégrée au site)
   flowstate: '#/app',
   portfolio: 'https://morjianeaitm.lovable.app',
@@ -278,36 +278,36 @@ export const caseFile = {
 /* ───────────── Pour Smalk ───────────── */
 
 export const smalk = {
-  lead: 'Smalk aide les marques à comprendre et à améliorer leur place dans les réponses des IA. Au fond, c\'est un problème d\'enquête : savoir pourquoi une source est citée, ou ne l\'est plus, avec des preuves plutôt que des intuitions.',
+  lead: 'Taly travaille à la frontière entre les modèles et les usages concrets. Ce qui m’attire dans l’IA agentique, c’est précisément cette étape : transformer un modèle en un système utile, connecté à des outils, contrôlable et assez fiable pour être utilisé dans le monde réel.',
   points: [
     {
       n: '01',
-      title: 'Transformer des signaux en preuves',
-      text: 'FlowState relie incidents, changements et documentation en hypothèses inspectables : chaque affirmation cite sa source, et les preuves contradictoires restent visibles.',
-      proof: 'Graphe de preuves · replay · contradictions',
+      title: 'Passer du prompt au système',
+      text: 'Je conçois des expériences qui ne s’arrêtent pas à une réponse de chatbot : contexte, étapes, outils, traces et validation humaine font partie du produit.',
+      proof: 'Claude Code · prototypage · workflows',
     },
     {
       n: '02',
-      title: 'Comprendre les agents IA de l\'intérieur',
-      text: 'J\'ai construit un serveur MCP à 8 outils et une couche LLM dont les sorties sont validées et ancrées dans les données. Savoir comment un agent lit et cite une source, c\'est le cœur du GEO.',
-      proof: 'MCP · sorties structurées · repli déterministe',
+      title: 'Connecter les agents au réel',
+      text: 'Avec FlowState AI, j’ai travaillé sur un serveur MCP à 8 outils et une couche LLM dont les sorties sont validées et ancrées dans les données. J’aime rendre les capacités d’un agent concrètes et testables.',
+      proof: 'MCP · outils · données structurées',
     },
     {
       n: '03',
-      title: 'Mesurer sans sur-promettre',
-      text: 'Confiance en catégories, inconnues affichées, approbation distincte de l\'exécution, journal d\'audit chaîné. Une donnée honnête vaut mieux qu\'un score flatteur.',
-      proof: 'Tests backend, frontend et e2e · CI',
+      title: 'Automatiser sans perdre le contrôle',
+      text: 'Un agent utile doit aussi savoir expliciter ses limites. Je privilégie les sorties vérifiables, les erreurs visibles, la traçabilité et une validation humaine quand une action a des conséquences.',
+      proof: 'Garde-fous · tests · traçabilité',
     },
   ],
-  geo: 'J\'ai appliqué FlowState à un cas de votre métier : une marque disparaît des réponses de Perplexity et de ChatGPT après une refonte de site. Les données sont fictives, les mécanismes sont réels : robots.txt, crawlers IA, sitemap, sources concurrentes.',
+  geo: 'Imaginez un workflow qui reçoit une demande, consulte les bons outils via MCP, rassemble les éléments utiles puis propose une action argumentée. FlowState est mon terrain d’expérimentation pour explorer cette logique. La démo utilise des données fictives : je distingue clairement le prototype de ce qui reste à intégrer et à valider en conditions réelles.',
 }
 
 /* ───────────── Profil (source : CV) ───────────── */
 
 export const profile = {
-  headline: 'Développeuse. Experte Claude et ChatGPT.',
+  headline: 'Développeuse. Je construis avec l’IA.',
   about:
-    'Diplômée d\'une Licence Informatique, je construis des applications de bout en bout, et je développe avec l\'IA au quotidien : Claude, Claude Code, ChatGPT et Codex. Je sais cadrer un modèle, le relier à des données réelles par MCP et vérifier ce qu\'il produit. J\'aime comprendre comment une technologie fonctionne, puis la transformer en outil concret.',
+    'Diplômée d\'une Licence Informatique, je construis des applications de bout en bout et j\'utilise Claude Code, ChatGPT et Codex pour passer rapidement d\'une idée à un prototype fonctionnel. Je m\'intéresse particulièrement aux agents IA, au Model Context Protocol (MCP), aux outils qui leur donnent accès aux bonnes données et aux garde-fous qui rendent leurs résultats vérifiables. Je préfère montrer un système qui fonctionne plutôt que prétendre tout savoir.',
   ai: ['Claude & Claude Code', 'ChatGPT & Codex', 'Serveurs MCP', 'Prompting structuré', 'Sorties LLM validées', 'Agents IA'],
   built: [
     { name: 'FlowState AI', what: 'Plateforme d\'enquête sur incidents : preuves citées, hypothèses, validation humaine, serveur MCP à 8 outils.', stack: 'Python · FastAPI · React · LLM · MCP', ai: true, href: links.repo },

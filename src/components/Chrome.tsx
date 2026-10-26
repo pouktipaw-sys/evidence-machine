@@ -13,7 +13,7 @@ const SECTIONS: [string, string][] = [
   ['method', 'Méthode'],
   ['profil', 'Profil'],
   ['projects', 'Artefacts'],
-  ['smalk', 'Pour Smalk'],
+  ['smalk', 'Pourquoi Taly'],
   ['finale', 'Contact'],
 ]
 
@@ -57,7 +57,7 @@ export function Nav() {
       <a href="#main" className="nav__brand">
         <i aria-hidden="true" />
         <span>MAM</span>
-        <em>The Evidence Machine</em>
+        <em>AI Agent Builder</em>
       </a>
       <p className="nav__where" aria-live="off">
         <span>0{cur + 1}</span> {SECTIONS[cur][1]}
@@ -73,7 +73,7 @@ export function Nav() {
           <a href="#projects">Projets</a>
         </li>
         <li>
-          <a href="#smalk">Smalk</a>
+          <a href="#smalk">Taly</a>
         </li>
         <li>
           <a href={links.flowstate}>App</a>
