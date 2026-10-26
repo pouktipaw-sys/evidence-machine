@@ -26,7 +26,7 @@ export function Smalk() {
     <section id="smalk" ref={root} className="section sm" aria-labelledby="sm-title">
       <Transition kind="shutter" from="var(--silver)" />
       <p className="mk sm__kicker">
-        <span className="dot" /> Candidature · Smalk AI
+        <span className="dot" /> Candidature · Taly
       </p>
       <h2 id="sm-title" className="sm__title">
         <span className="mask">
@@ -34,7 +34,7 @@ export function Smalk() {
         </span>
         <span className="mask">
           <span className="mask__in">
-            Smalk<em>.</em>
+            Taly<em>.</em>
           </span>
         </span>
       </h2>
@@ -53,19 +53,19 @@ export function Smalk() {
 
       <div className="sm__geo">
         <div>
-          <p className="mk">Scénario GEO · INC-2061</p>
-          <p className="sm__geo-t">Votre marque n'est plus citée par les IA. Pourquoi ?</p>
+          <p className="mk">Workflow agentique · DÉMO</p>
+          <p className="sm__geo-t">Du modèle à l’action : comment construire un agent utile ?</p>
           <p className="sm__geo-x">{smalk.geo}</p>
         </div>
         <div className="sm__geo-cta">
           <a className="btn btn--primary magnetic" href="#/app/incidents/INC-2061/replay" data-cursor="OPEN">
-            Voir l'enquête en direct <i aria-hidden="true">→</i>
+            Explorer le prototype <i aria-hidden="true">→</i>
           </a>
           <a className="btn btn--ghost magnetic" href={links.repo} target="_blank" rel="noopener noreferrer" data-cursor="OPEN">
             Code source de FlowState ↗
           </a>
           <p className="sm__note">
-            Démo complète (FastAPI + React) sur <a href={links.demo} target="_blank" rel="noopener noreferrer">Render</a>, accès sur demande.
+            Prototype FlowState AI (FastAPI + React) sur <a href={links.demo} target="_blank" rel="noopener noreferrer">Render</a>, accès sur demande.
           </p>
         </div>
       </div>
