@@ -12,6 +12,7 @@ const SECTIONS: [string, string][] = [
   ['xray', 'X-Ray'],
   ['method', 'Méthode'],
   ['projects', 'Artefacts'],
+  ['smalk', 'Pour Smalk'],
   ['finale', 'Contact'],
 ]
 
@@ -69,6 +70,9 @@ export function Nav() {
         </li>
         <li>
           <a href="#projects">Projets</a>
+        </li>
+        <li>
+          <a href="#smalk">Smalk</a>
         </li>
         <li>
           <a href={links.flowstate}>App</a>

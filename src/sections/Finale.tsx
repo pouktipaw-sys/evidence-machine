@@ -31,7 +31,7 @@ export function Finale() {
 
   return (
     <section id="finale" ref={root} className="finale" aria-labelledby="fin-title">
-      <Transition kind="iris" from="var(--silver)" />
+      <Transition kind="frame" from="var(--ink)" />
       <div className="layer layer--back" aria-hidden="true">
         <div className="fin__a">
           <span className="mask">

@@ -11,7 +11,7 @@ gsap.registerPlugin(ScrollTrigger)
 
 const ZOOMS = [
   { key: 'events', n: '01', title: 'EVENTS', sub: 'La chronologie des signaux.', text: 'Chaque événement est horodaté, sourcé et classé par gravité. On lit l\'incident comme un récit, pas comme un flux de logs.', panels: ['events'], side: 'right' as const },
-  { key: 'evidence', n: '02', title: 'EVIDENCE', sub: 'Ce qui explique l\'incident.', text: 'Chaque preuve est citée, scorée et reliée à une hypothèse. Une preuve faible (0.32) reste visible : elle nourrit l\'incertitude.', panels: ['ev1', 'ev2', 'ev3', 'ev4'], side: 'right' as const },
+  { key: 'evidence', n: '02', title: 'EVIDENCE', sub: 'Ce qui explique l\'incident.', text: 'Chaque preuve est citée, scorée et reliée à une hypothèse. Une preuve faible reste visible : elle nourrit l\'incertitude. La confiance s\'exprime en catégories, jamais en pourcentage.', panels: ['ev1', 'ev2', 'ev3', 'ev4'], side: 'right' as const },
   { key: 'decision', n: '03', title: 'DECISION', sub: 'La proposition soumise à validation.', text: 'Le système propose, l\'humain décide : approuver, rejeter ou demander une preuve de plus. Ce qui reste à vérifier est affiché, pas caché.', panels: ['decision', 'actions'], side: 'left' as const },
 ]
 
@@ -239,7 +239,7 @@ export function Theatre({ onExplore }: { onExplore: () => void }) {
               <b>FLOWSTATE AI</b> <span>Des signaux à la décision.</span>
             </p>
             <button type="button" className="btn btn--line magnetic" onClick={onExplore} data-cursor="OPEN">
-              Ouvrir l'application <i aria-hidden="true">↗</i>
+              Voir l'enquête en direct <i aria-hidden="true">↗</i>
             </button>
           </div>
           <div ref={dashRef} className="showcase-dash" style={{ left: box.x, top: box.y, width: box.w, height: box.h }}>

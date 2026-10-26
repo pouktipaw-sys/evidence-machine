@@ -23,7 +23,7 @@ const initial: State = {
   verdicts: {},
   asked: {},
   log: [],
-  settings: { minConfidence: 0.6, sources: { logs: true, metrics: true, traces: true, deploys: true, audit: true } },
+  settings: { minConfidence: 0.5, sources: { logs: true, metrics: true, traces: true, deploys: true, audit: true } },
 }
 
 function load(): State {

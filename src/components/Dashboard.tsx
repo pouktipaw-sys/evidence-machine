@@ -1,7 +1,9 @@
 import { useMemo, useState, type CSSProperties } from 'react'
 import type { DashEvent } from '../content'
 import { layoutFor, type PanelId } from '../lib/dashLayout'
-import { incidents, type Incident } from '../app/incidents'
+import { incidents, confLevel, type Incident } from '../app/incidents'
+
+const LEVEL_W = { élevée: '100%', moyenne: '62%', faible: '28%' }
 
 type Verdict = 'pending' | 'approved' | 'rejected'
 
@@ -183,8 +185,8 @@ export function Dashboard(props: Props) {
             <span className="fs-evi__t">{ev.title}</span>
             <code className="fs-evi__x">{ev.excerpt}</code>
             <span className="fs-conf">
-              <span style={{ width: `${ev.confidence * 100}%` }} />
-              <small>{ev.confidence.toFixed(2)}</small>
+              <span style={{ width: LEVEL_W[confLevel(ev.confidence)] }} />
+              <small>{confLevel(ev.confidence)}</small>
             </span>
           </Tag>
         )
@@ -194,7 +196,7 @@ export function Dashboard(props: Props) {
       <div className="fs-p fs-dec" data-panel="decision" style={box('decision')}>
         <header className="fs-h">
           <span>03 · DECISION</span>
-          <span>conf. {dashboard.decision.confidence.toFixed(2)}</span>
+          <span>confiance {confLevel(dashboard.decision.confidence)}</span>
         </header>
         <p className="fs-dec__lbl">{verdict === 'rejected' ? 'Branche alternative' : 'Proposition'}</p>
         <p className="fs-dec__a">{blocked && verdict === 'pending' ? 'Proposition masquée : confiance sous le seuil' : verdict === 'rejected' ? dashboard.decision.alternative : dashboard.decision.action}</p>
@@ -203,7 +205,7 @@ export function Dashboard(props: Props) {
             <div key={h.id} className={`fs-hyp ${focusHyp === h.id ? 'is-hot' : ''} ${verdict === 'rejected' && h.id === 'H2' ? 'is-hot' : ''}`}>
               <span>{h.id}</span>
               <span className="fs-hyp__bar">
-                <i style={{ width: `${(verdict === 'rejected' ? (h.id === 'H1' ? 0.4 : 0.6) : h.score) * 100}%` }} />
+                <i style={{ width: LEVEL_W[confLevel(verdict === 'rejected' ? (h.id === 'H1' ? 0.4 : 0.6) : h.score)] }} />
               </span>
               <span className="fs-hyp__l">{h.label}</span>
             </div>

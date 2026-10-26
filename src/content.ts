@@ -16,6 +16,9 @@ export const links = {
   // l'application FlowState AI (démo intégrée au site)
   flowstate: '#/app',
   portfolio: 'https://morjianeaitm.lovable.app',
+  // the real FlowState project
+  repo: 'https://github.com/pouktipaw-sys/AI-codex-',
+  demo: 'https://flowstate-ai-demo.onrender.com',
 }
 
 export type Severity = 'info' | 'warn' | 'crit'
@@ -268,4 +271,31 @@ export const caseFile = {
     ['Impact', 'p95 checkout 2,4 s · 3 % de paiements en échec', '03:14'],
     ['Proposition', 'Rollback v2.14.2 · réversible', 'à valider'],
   ],
+}
+
+/* ───────────── Pour Smalk ───────────── */
+
+export const smalk = {
+  lead: 'Smalk aide les marques à comprendre et à améliorer leur place dans les réponses des IA. Au fond, c\'est un problème d\'enquête : savoir pourquoi une source est citée, ou ne l\'est plus, avec des preuves plutôt que des intuitions.',
+  points: [
+    {
+      n: '01',
+      title: 'Transformer des signaux en preuves',
+      text: 'FlowState relie incidents, changements et documentation en hypothèses inspectables : chaque affirmation cite sa source, et les preuves contradictoires restent visibles.',
+      proof: 'Graphe de preuves · replay · contradictions',
+    },
+    {
+      n: '02',
+      title: 'Comprendre les agents IA de l\'intérieur',
+      text: 'J\'ai construit un serveur MCP à 8 outils et une couche LLM dont les sorties sont validées et ancrées dans les données. Savoir comment un agent lit et cite une source, c\'est le cœur du GEO.',
+      proof: 'MCP · sorties structurées · repli déterministe',
+    },
+    {
+      n: '03',
+      title: 'Mesurer sans sur-promettre',
+      text: 'Confiance en catégories, inconnues affichées, approbation distincte de l\'exécution, journal d\'audit chaîné. Une donnée honnête vaut mieux qu\'un score flatteur.',
+      proof: 'Tests backend, frontend et e2e · CI',
+    },
+  ],
+  geo: 'J\'ai appliqué FlowState à un cas de votre métier : une marque disparaît des réponses de Perplexity et de ChatGPT après une refonte de site. Les données sont fictives, les mécanismes sont réels : robots.txt, crawlers IA, sitemap, sources concurrentes.',
 }

@@ -317,7 +317,7 @@ export function IncidentLab() {
               <div key={h.label} className={`lab__hyp ${verdict === 'rejected' && i === 1 ? 'is-hot' : ''}`}>
                 <div>
                   <span>H{i + 1}</span>
-                  <b>{p.toFixed(2)}</b>
+                  <b>{p >= 0.75 ? 'élevée' : p >= 0.5 ? 'moyenne' : 'faible'}</b>
                 </div>
                 <i style={{ width: step >= 4 ? `${p * 100}%` : 0 }} />
                 <p>{h.label}</p>

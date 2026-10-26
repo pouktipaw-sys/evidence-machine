@@ -42,6 +42,18 @@ export interface Incident {
     recoverTo: number
   }
   followUps: { approved: DashEvent; rejected: DashEvent; asked: DashEvent; askLabel: string }
+  /** a similar past incident, when retrieval found one */
+  related?: { id: string; title: string; note: string }
+  /** draft written for customers: never states an unconfirmed cause */
+  customerDraft: string
+  /** scenario tag shown in the inbox */
+  tag?: string
+}
+
+/** FlowState never shows confidence as a percentage: categories only */
+export type ConfLevel = 'élevée' | 'moyenne' | 'faible'
+export function confLevel(n: number): ConfLevel {
+  return n >= 0.75 ? 'élevée' : n >= 0.5 ? 'moyenne' : 'faible'
 }
 
 export const incidents: Incident[] = [
@@ -77,6 +89,8 @@ export const incidents: Incident[] = [
       asked: { id: 'EVT-0416', time: '03:18:02', source: 'flowstate', label: 'Preuve demandée : test de charge', severity: 'info', detail: 'En attente d\'un résultat de test de charge sur v2.14.3.' },
       askLabel: 'test de charge',
     },
+    related: { id: 'INC-1977', title: 'Retries en boucle sur payments-api', note: 'Même mécanisme : retry sans backoff, pool saturé. Résolu par rollback.' },
+    customerDraft: 'Certains paiements sont plus lents que d\'habitude depuis 03:14. Nos équipes enquêtent ; la cause n\'est pas encore confirmée. Prochaine mise à jour dans 30 minutes.',
   },
   {
     id: 'INC-2051',
@@ -133,6 +147,7 @@ export const incidents: Incident[] = [
       asked: { id: 'EVT-0510', time: '11:45:02', source: 'flowstate', label: 'Preuve demandée : état du 2ᵉ cluster', severity: 'info', detail: 'En attente des métriques de cache-redis-03.' },
       askLabel: 'état du 2ᵉ cluster',
     },
+    customerDraft: 'La recherche est ralentie depuis 11:42. Une piste est à l\'étude ; elle n\'est pas confirmée. Prochaine mise à jour dans 30 minutes.',
   },
   {
     id: 'INC-2049',
@@ -188,6 +203,8 @@ export const incidents: Incident[] = [
       asked: { id: 'EVT-0486', time: '09:20:40', source: 'flowstate', label: 'Preuve demandée : état de la migration', severity: 'info', detail: 'En attente du statut de la migration 0412.' },
       askLabel: 'état de la migration',
     },
+    related: { id: 'INC-1890', title: 'Mapper non tolérant aux champs nuls', note: 'Un champ optionnel avait déjà provoqué des 5xx en v4.8.' },
+    customerDraft: 'Une partie des commandes échoue depuis 09:14. Nous enquêtons ; la cause n\'est pas encore confirmée.',
   },
   {
     id: 'INC-2053',
@@ -243,6 +260,125 @@ export const incidents: Incident[] = [
       asked: { id: 'EVT-0525', time: '04:14:40', source: 'flowstate', label: 'Preuve demandée : sortie réseau du bucket', severity: 'info', detail: 'En attente des logs d\'egress S3.' },
       askLabel: 'sortie réseau du bucket',
     },
+    customerDraft: 'Nous analysons une activité inhabituelle sur un accès technique interne. Aucune conclusion n\'est établie à ce stade.',
+  },
+  {
+    // the flagship case of the real FlowState demo (fictional Lumora Cloud fixtures)
+    id: 'INC-1042',
+    title: 'Northstar : échecs d\'authentification',
+    service: 'auth-gateway',
+    env: 'Lumora Cloud · prod',
+    opened: '08:47:10',
+    severity: 'SEV2',
+    tag: 'Cas de la démo FlowState',
+    selectedEvent: 'EVT-1042-3',
+    events: [
+      { id: 'CHG-281', time: '08:20:00', source: 'change', label: 'Déploiement progressif des permissions', severity: 'info', detail: 'Nouveau modèle de scopes déployé sur 30 % des tenants.' },
+      { id: 'EVT-1042-1', time: '08:31:44', source: 'auth-gateway', label: '401 en hausse pour le tenant Northstar', severity: 'warn', detail: 'Les rejets concernent des jetons pourtant valides.' },
+      { id: 'EVT-1042-2', time: '08:39:02', source: 'support', label: '3 tickets Northstar : « déconnexions »', severity: 'warn', detail: 'Les utilisateurs doivent se reconnecter plusieurs fois par heure.' },
+      { id: 'EVT-1042-3', time: '08:47:10', source: 'monitoring', label: 'Taux d\'échec d\'auth 6,4 %', severity: 'crit', detail: 'Seuil d\'alerte : 1 %. Limité aux tenants du lot CHG-281 ?' },
+      { id: 'EVT-1042-4', time: '08:52:30', source: 'traces', label: 'Traces client manquantes', severity: 'info', detail: 'Aucune trace côté client Northstar : impossible de confirmer le parcours.' },
+    ],
+    evidence: [
+      { id: 'E1', kind: 'CHANGE', title: 'CHG-281 précède les échecs de 11 min', excerpt: 'CHG-281 · permissions rollout · 30 % des tenants', confidence: 0.64, supports: 'H1' },
+      { id: 'E2', kind: 'RUNBOOK', title: 'KB-17 : vérifier les scopes après un rollout', excerpt: 'KB-17 · « comparer scopes avant/après »', confidence: 0.6, supports: 'H1' },
+      { id: 'E3', kind: 'HISTORY', title: 'INC-998 : symptômes similaires', excerpt: 'INC-998 · scopes manquants après migration', confidence: 0.55, supports: 'H1' },
+      { id: 'E4', kind: 'PROBE', title: 'KB-19 : la sonde de refresh passe', excerpt: 'KB-19 · token refresh probe : OK', confidence: 0.45, supports: 'H2' },
+    ],
+    hypotheses: [
+      { id: 'H1', label: 'CHG-281 retire un scope requis par les clients Northstar', score: 0.62 },
+      { id: 'H2', label: 'Le renouvellement des jetons échoue (contredit par la sonde KB-19)', score: 0.3 },
+    ],
+    decision: {
+      action: 'Mettre en pause CHG-281 pour la cohorte de Northstar',
+      cta: 'Approuver la pause',
+      approvedStatus: 'PAUSE APPROUVÉE · NON EXÉCUTÉE',
+      reasoning: ['Corrélation temporelle avec CHG-281 (ce n\'est pas une preuve)', 'Le runbook KB-17 décrit ce scénario', 'Pause réversible, limitée à une cohorte'],
+      unknowns: ['Traces client Northstar manquantes', 'Cohorte exacte du tenant dans CHG-281 non confirmée'],
+      confidence: 0.62,
+      alternative: 'Collecter les traces client puis réévaluer H2',
+    },
+    chart: {
+      metric: 'échecs d\'authentification',
+      big: '6.4',
+      bigUnit: '%',
+      values: [0.3, 0.3, 0.4, 0.3, 0.3, 0.4, 0.9, 2.1, 3.8, 5.0, 5.9, 6.4, 6.2, 6.4, 6.3, 6.1, 6.4, 6.2],
+      max: 7.5,
+      threshold: 1,
+      thresholdLabel: 'ALERTE 1 %',
+      markerAt: 5.2,
+      markerLabel: 'CHG-281',
+      peakAt: 11,
+      peakLabel: 'pic 6,4 %',
+      recoverTo: 0.3,
+    },
+    followUps: {
+      approved: { id: 'EVT-1042-5', time: '08:58:12', source: 'humain', label: 'Pause approuvée : intention enregistrée, non exécutée', severity: 'info', detail: 'L\'approbation enregistre une intention. Aucun rollback n\'est déclenché par FlowState.' },
+      rejected: { id: 'EVT-1042-5', time: '08:58:12', source: 'humain', label: 'Pause rejetée, collecte de traces demandée', severity: 'warn', detail: 'L\'enquête repart sur la collecte des traces client.' },
+      asked: { id: 'EVT-1042-6', time: '08:59:40', source: 'flowstate', label: 'Preuve demandée : cohorte du tenant', severity: 'info', detail: 'En attente de la liste des tenants inclus dans CHG-281.' },
+      askLabel: 'cohorte du tenant',
+    },
+    related: { id: 'INC-998', title: 'Scopes manquants après migration', note: 'Symptômes proches ; la corrélation n\'implique pas la même cause.' },
+    customerDraft: 'Certains utilisateurs de Northstar sont déconnectés de façon inattendue. Nous enquêtons ; la cause n\'est pas confirmée. Prochaine mise à jour dans 30 minutes.',
+  },
+  {
+    // a GEO case: why a brand stopped being cited by AI answer engines (fictional brand)
+    id: 'INC-2061',
+    title: 'Visibilité IA : la marque disparaît des réponses',
+    service: 'maison-arlo.fr',
+    env: 'GEO · moteurs de réponse IA',
+    opened: '10:05:00',
+    severity: 'SEV2',
+    tag: 'Scénario GEO',
+    selectedEvent: 'EVT-GEO-4',
+    events: [
+      { id: 'EVT-GEO-1', time: 'J-12', source: 'deploy', label: 'Nouveau robots.txt mis en ligne', severity: 'info', detail: 'Refonte du site : règles crawler réécrites par le prestataire.' },
+      { id: 'EVT-GEO-2', time: 'J-11', source: 'crawl-logs', label: 'Visites GPTBot et PerplexityBot : −96 %', severity: 'warn', detail: '1 240 visites/jour → 48. Googlebot inchangé.' },
+      { id: 'EVT-GEO-3', time: 'J-6', source: 'sitemap', label: 'sitemap.xml en 404', severity: 'warn', detail: 'Ancienne URL du sitemap supprimée pendant la refonte.' },
+      { id: 'EVT-GEO-4', time: 'J-2', source: 'ai-visibility', label: 'Part de citation 34 % → 7 %', severity: 'crit', detail: 'Sur 200 questions suivies (« meilleur canapé modulable »…).' },
+      { id: 'EVT-GEO-5', time: 'J-1', source: 'ai-visibility', label: 'Un comparatif concurrent cité à sa place', severity: 'warn', detail: 'Perplexity cite désormais un guide d\'achat tiers dans 61 % des réponses.' },
+    ],
+    evidence: [
+      { id: 'E1', kind: 'ROBOTS', title: 'GPTBot et PerplexityBot bloqués', excerpt: 'User-agent: GPTBot · Disallow: /', confidence: 0.86, supports: 'H1' },
+      { id: 'E2', kind: 'CRAWL', title: 'Les crawlers IA ne passent plus', excerpt: 'PerplexityBot 640/j → 21/j depuis J-11', confidence: 0.82, supports: 'H1' },
+      { id: 'E3', kind: 'SITEMAP', title: 'Sitemap introuvable', excerpt: 'GET /sitemap.xml → 404', confidence: 0.58, supports: 'H1' },
+      { id: 'E4', kind: 'SEASON', title: 'Baisse saisonnière des requêtes ?', excerpt: 'volume de questions −8 % sur la période', confidence: 0.24, supports: 'H2' },
+    ],
+    hypotheses: [
+      { id: 'H1', label: 'Le nouveau robots.txt bloque les crawlers des moteurs de réponse IA', score: 0.8 },
+      { id: 'H2', label: 'Baisse saisonnière de l\'intérêt pour la catégorie', score: 0.2 },
+    ],
+    decision: {
+      action: 'Rétablir l\'accès des crawlers IA et republier le sitemap',
+      cta: 'Approuver le correctif',
+      approvedStatus: 'CORRECTIF APPROUVÉ · NON EXÉCUTÉ',
+      reasoning: ['La chute des visites suit le nouveau robots.txt (J-11)', 'Googlebot non touché : le blocage vise les agents IA', 'Changement réversible, sans impact SEO classique'],
+      unknowns: ['Délai de recrawl des moteurs : non maîtrisé', 'Le comparatif concurrent restera-t-il cité ?'],
+      confidence: 0.8,
+      alternative: 'Mesurer 7 jours de plus avant d\'agir',
+    },
+    chart: {
+      metric: 'part de citation dans les réponses IA',
+      big: '7',
+      bigUnit: '%',
+      values: [34, 33, 35, 34, 36, 35, 33, 30, 24, 17, 12, 9, 8, 7, 7, 8, 7, 7],
+      max: 40,
+      threshold: 20,
+      thresholdLabel: 'OBJECTIF 20 %',
+      markerAt: 6.3,
+      markerLabel: 'ROBOTS.TXT',
+      peakAt: 13,
+      peakLabel: 'creux 7 %',
+      recoverTo: 33,
+    },
+    followUps: {
+      approved: { id: 'EVT-GEO-6', time: 'J0', source: 'humain', label: 'Correctif approuvé : intention enregistrée', severity: 'info', detail: 'Rien n\'est modifié sur le site par FlowState : l\'équipe web applique le correctif.' },
+      rejected: { id: 'EVT-GEO-6', time: 'J0', source: 'humain', label: 'Correctif rejeté, mesure prolongée', severity: 'warn', detail: 'Suivi des citations 7 jours de plus.' },
+      asked: { id: 'EVT-GEO-7', time: 'J0', source: 'flowstate', label: 'Preuve demandée : réponses ChatGPT archivées', severity: 'info', detail: 'En attente des réponses capturées avant/après J-11.' },
+      askLabel: 'réponses archivées avant/après',
+    },
+    related: { id: 'INC-1733', title: 'Pages produits en noindex après migration', note: 'Même famille : une refonte qui coupe un canal d\'acquisition sans alerte.' },
+    customerDraft: 'Votre marque est moins citée par les assistants IA depuis dix jours. Une cause probable est identifiée (accès des robots IA) ; elle reste à confirmer après correctif.',
   },
 ]
 

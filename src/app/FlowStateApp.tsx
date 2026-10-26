@@ -1,8 +1,11 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Dashboard } from '../components/Dashboard'
 import { links, person } from '../content'
-import { incidents, incidentById, type Incident, type Sev } from './incidents'
+import { incidents, incidentById, confLevel, type Incident, type Sev } from './incidents'
+
+const LEVEL_W = { élevée: '100%', moyenne: '62%', faible: '28%' }
 import { fs, useFS, verdictOf, type LogEntry, type Verdict } from './store'
+import { EvidenceGraph, Replay, Audit } from './Investigation'
 
 /* ───── tiny hash router: #/app, #/app/incidents/ID, #/app/journal, #/app/preuves, #/app/reglages ───── */
 export function go(path: string) {
@@ -16,10 +19,10 @@ function useRoute() {
     return () => window.removeEventListener('hashchange', on)
   }, [])
   const parts = hash.replace(/^#\/app\/?/, '').split('/').filter(Boolean)
-  return { view: parts[0] ?? 'incidents', id: parts[1] }
+  return { view: parts[0] ?? 'incidents', id: parts[1], tab: parts[2] ?? 'enquete' }
 }
 
-const STATUS: Record<Verdict, string> = { pending: 'Décision requise', approved: 'Résolu', rejected: 'Branche alternative' }
+const STATUS: Record<Verdict, string> = { pending: 'Décision requise', approved: 'Approuvé · non exécuté', rejected: 'Branche alternative' }
 const SEV_ORDER: Record<Sev, number> = { SEV1: 0, SEV2: 1, SEV3: 2 }
 
 function fmtTime(iso: string) {
@@ -28,7 +31,7 @@ function fmtTime(iso: string) {
 
 /* ═════════ shell ═════════ */
 export function FlowStateApp() {
-  const { view, id } = useRoute()
+  const { view, id, tab } = useRoute()
   const [query, setQuery] = useState('')
   const verdicts = useFS((s) => s.verdicts)
   const log = useFS((s) => s.log)
@@ -120,7 +123,7 @@ export function FlowStateApp() {
 
         <main className="fsa-main" ref={mainRef}>
           {view === 'incidents' && !id && <Inbox query={query} />}
-          {view === 'incidents' && id && (current ? <Detail inc={current} /> : <Missing />)}
+          {view === 'incidents' && id && (current ? <Detail inc={current} tab={tab} /> : <Missing />)}
           {view === 'journal' && <Journal />}
           {view === 'preuves' && <EvidenceLib />}
           {view === 'reglages' && <Settings />}
@@ -171,13 +174,13 @@ function Inbox({ query }: { query: string }) {
 
   const pending = incidents.filter((i) => (verdicts[i.id] ?? 'pending') === 'pending').length
   const decided = log.filter((l) => l.kind === 'approved' || l.kind === 'rejected').length
-  const avgConf = incidents.reduce((a, i) => a + i.decision.confidence, 0) / incidents.length
+  const contradictions = incidents.reduce((a, i) => a + i.evidence.filter((e) => e.supports === 'H2').length, 0)
   const activeSources = Object.values(sources).filter(Boolean).length
 
   const tabs: { k: 'all' | Verdict; l: string }[] = [
     { k: 'all', l: 'Tous' },
     { k: 'pending', l: 'Décision requise' },
-    { k: 'approved', l: 'Résolus' },
+    { k: 'approved', l: 'Approuvés' },
     { k: 'rejected', l: 'Branche alternative' },
   ]
 
@@ -200,8 +203,8 @@ function Inbox({ query }: { query: string }) {
           <b>{decided}</b>
         </div>
         <div className="fsa-kpi">
-          <span>Confiance moyenne</span>
-          <b>{avgConf.toFixed(2)}</b>
+          <span>Preuves contradictoires</span>
+          <b>{contradictions}</b>
         </div>
         <div className="fsa-kpi">
           <span>Sources connectées</span>
@@ -239,6 +242,7 @@ function Inbox({ query }: { query: string }) {
               <span role="cell" className="fsa-inc">
                 <b>{i.id}</b>
                 {i.title}
+                {i.tag && <em>{i.tag}</em>}
               </span>
               <span role="cell" className="fsa-mono">
                 {i.service}
@@ -249,9 +253,9 @@ function Inbox({ query }: { query: string }) {
               </span>
               <span role="cell" className="fsa-conf">
                 <i>
-                  <i style={{ width: `${i.decision.confidence * 100}%` }} />
+                  <i style={{ width: LEVEL_W[confLevel(i.decision.confidence)] }} />
                 </i>
-                {i.decision.confidence.toFixed(2)}
+                {confLevel(i.decision.confidence)}
               </span>
               <span role="cell" className="fsa-mono">
                 {i.opened}
@@ -266,7 +270,14 @@ function Inbox({ query }: { query: string }) {
 }
 
 /* ═════════ incident detail ═════════ */
-function Detail({ inc }: { inc: Incident }) {
+const TABS: [string, string][] = [
+  ['enquete', 'Enquête'],
+  ['replay', 'Replay en direct'],
+  ['graphe', 'Graphe de preuves'],
+  ['audit', 'Audit'],
+]
+
+function Detail({ inc, tab }: { inc: Incident; tab: string }) {
   const verdict = useFS((s) => verdictOf(s, inc.id))
   const asked = useFS((s) => !!s.asked[inc.id])
   const minConf = useFS((s) => s.settings.minConfidence)
@@ -276,11 +287,13 @@ function Detail({ inc }: { inc: Incident }) {
   const mobile = w < 640
 
   useLayoutEffect(() => {
-    const el = ref.current!
+    const el = ref.current
+    if (!el) return
+    setW(el.clientWidth)
     const ro = new ResizeObserver(() => setW(el.clientWidth))
     ro.observe(el)
     return () => ro.disconnect()
-  }, [])
+  }, [tab])
 
   const mine = log.filter((l) => l.incident === inc.id)
   const blocked = inc.decision.confidence < minConf
@@ -312,9 +325,24 @@ function Detail({ inc }: { inc: Incident }) {
         </div>
       </div>
 
+      <nav className="fsa-dtabs" aria-label="Vues de l'enquête">
+        {TABS.map(([k, l]) => (
+          <a key={k} href={`#/app/incidents/${inc.id}/${k}`} className={tab === k ? 'is-on' : ''} aria-current={tab === k ? 'page' : undefined}>
+            {k === 'replay' && <i className="fsa-live" aria-hidden="true" />}
+            {l}
+          </a>
+        ))}
+      </nav>
+
+      {tab === 'replay' && <Replay key={inc.id} inc={inc} verdict={verdict} />}
+      {tab === 'graphe' && <EvidenceGraph key={inc.id} inc={inc} />}
+      {tab === 'audit' && <Audit key={inc.id} inc={inc} verdict={verdict} decisions={mine} />}
+
+      {tab === 'enquete' && (
+      <>
       {blocked && verdict === 'pending' && (
         <p className="fsa-banner">
-          La confiance de la proposition ({inc.decision.confidence.toFixed(2)}) est sous le seuil de l'espace ({minConf.toFixed(2)}). Elle est masquée jusqu'à ce que de nouvelles preuves arrivent, ou que le seuil soit abaissé dans <a href="#/app/reglages">Réglages</a>.
+          La confiance de la proposition ({confLevel(inc.decision.confidence)}) est sous le niveau requis par l'espace ({confLevel(minConf)}). Elle est masquée jusqu'à ce que de nouvelles preuves arrivent, ou que le seuil soit abaissé dans <a href="#/app/reglages">Réglages</a>.
         </p>
       )}
 
@@ -338,6 +366,29 @@ function Detail({ inc }: { inc: Incident }) {
         <h2>Historique des décisions sur {inc.id}</h2>
         {mine.length === 0 ? <p className="fsa-none">Aucune décision pour l'instant. Approuvez, rejetez ou demandez une preuve dans le panneau de décision.</p> : <LogList entries={mine} />}
       </section>
+
+      <div className="fsa-pair">
+        <section className="fsa-card">
+          <h2>Brouillon de communication client</h2>
+          <blockquote className="fsa-quote">{inc.customerDraft}</blockquote>
+          <p className="fsa-note">Rédigé par FlowState, jamais envoyé automatiquement. Il n'affirme pas une cause non confirmée.</p>
+        </section>
+        <section className="fsa-card">
+          <h2>Incident similaire</h2>
+          {inc.related ? (
+            <>
+              <p className="fsa-rel">
+                <b>{inc.related.id}</b> {inc.related.title}
+              </p>
+              <p className="fsa-note">{inc.related.note}</p>
+            </>
+          ) : (
+            <p className="fsa-none">Aucun incident comparable dans l'historique.</p>
+          )}
+        </section>
+      </div>
+      </>
+      )}
     </div>
   )
 }
@@ -407,7 +458,7 @@ function EvidenceLib() {
   const kinds = useMemo(() => Array.from(new Set(all.map((e) => e.kind))), [all])
   const [kind, setKind] = useState<string | null>(null)
   const [strong, setStrong] = useState(false)
-  const list = all.filter((e) => (!kind || e.kind === kind) && (!strong || e.confidence >= 0.7)).sort((a, b) => b.confidence - a.confidence)
+  const list = all.filter((e) => (!kind || e.kind === kind) && (!strong || confLevel(e.confidence) === 'élevée')).sort((a, b) => b.confidence - a.confidence)
   return (
     <div className="fsa-page">
       <div className="fsa-head">
@@ -427,7 +478,7 @@ function EvidenceLib() {
         ))}
         <label className="fsa-switch">
           <input type="checkbox" checked={strong} onChange={() => setStrong(!strong)} />
-          <span /> Confiance ≥ 0.70
+          <span /> Confiance élevée
         </label>
       </div>
       <div className="fsa-evgrid">
@@ -441,9 +492,9 @@ function EvidenceLib() {
             <code>{e.excerpt}</code>
             <span className="fsa-conf">
               <i>
-                <i style={{ width: `${e.confidence * 100}%` }} />
+                <i style={{ width: LEVEL_W[confLevel(e.confidence)] }} />
               </i>
-              {e.confidence.toFixed(2)}
+              {confLevel(e.confidence)}
             </span>
           </a>
         ))}
@@ -486,17 +537,19 @@ function Settings() {
           </div>
           <div className="fsa-row">
             <div>
-              <b>Seuil de confiance pour proposer une action</b>
+              <b>Confiance minimale pour proposer une action</b>
               <p>
-                Sous ce seuil, la proposition est masquée et seules les preuves sont montrées.{' '}
+                En dessous, la proposition est masquée et seules les preuves sont montrées.{' '}
                 {hidden > 0 ? <strong>{hidden} incident(s) concerné(s).</strong> : 'Aucun incident concerné.'}
               </p>
             </div>
-            <label className="fsa-range">
-              <span className="sr-only">Seuil de confiance</span>
-              <input type="range" min={0.5} max={0.95} step={0.01} value={settings.minConfidence} onChange={(e) => fs.setMinConfidence(Number(e.target.value))} />
-              <output>{settings.minConfidence.toFixed(2)}</output>
-            </label>
+            <div className="fsa-seg" role="radiogroup" aria-label="Confiance minimale">
+              {([['faible', 0], ['moyenne', 0.5], ['élevée', 0.75]] as const).map(([l, v]) => (
+                <button key={l} type="button" role="radio" aria-checked={confLevel(settings.minConfidence) === l} className={confLevel(settings.minConfidence) === l ? 'is-on' : ''} onClick={() => fs.setMinConfidence(v)}>
+                  {l}
+                </button>
+              ))}
+            </div>
           </div>
         </section>
         <section className="fsa-card">
@@ -514,6 +567,17 @@ function Settings() {
             </div>
           ))}
           <p className="fsa-note">Démonstration : les sources sont simulées.</p>
+        </section>
+        <section className="fsa-card">
+          <h2>Serveur MCP · 8 outils</h2>
+          <ul className="fsa-tools">
+            {['list_incidents', 'investigate_incident', 'search_knowledge', 'find_related_incidents', 'summarize_findings', 'draft_customer_update', 'generate_incident_report', 'get_investigation_history'].map((t) => (
+              <li key={t}>
+                <code>{t}</code>
+              </li>
+            ))}
+          </ul>
+          <p className="fsa-note">Les noms des outils du projet FlowState. Aucun n'exécute d'action ni n'envoie de message : l'approbation reste humaine.</p>
         </section>
       </div>
     </div>

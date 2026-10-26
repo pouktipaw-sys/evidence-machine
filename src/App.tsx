@@ -9,6 +9,7 @@ import { XRay } from './sections/XRay'
 import { Method } from './sections/Method'
 import { Projects } from './sections/Projects'
 import { Finale } from './sections/Finale'
+import { Smalk } from './sections/Smalk'
 import { Nav, Cursor, BuildNotes } from './components/Chrome'
 import { FlowStateApp } from './app/FlowStateApp'
 import './styles/app.css'
@@ -89,12 +90,13 @@ export function App() {
       </a>
       <Nav />
       <main id="main">
-        <Theatre onExplore={() => (window.location.hash = '#/app/incidents/INC-2047')} />
+        <Theatre onExplore={() => (window.location.hash = '#/app/incidents/INC-1042/replay')} />
         <WhiteRoom />
         <IncidentLab />
         <XRay />
         <Method />
         <Projects />
+        <Smalk />
         <Finale />
       </main>
       <BuildNotes />
