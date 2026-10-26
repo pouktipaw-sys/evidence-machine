@@ -1,0 +1,249 @@
+import { dashboard, type DashEvent, type Evidence } from '../content'
+
+/**
+ * FlowState AI — demo workspace. Every incident here is FICTIONAL and labelled as such in the UI.
+ * Each incident carries everything the investigation view needs.
+ */
+
+export type Sev = 'SEV1' | 'SEV2' | 'SEV3'
+
+export interface Incident {
+  id: string
+  title: string
+  service: string
+  env: string
+  opened: string
+  severity: Sev
+  selectedEvent: string
+  events: DashEvent[]
+  evidence: Evidence[]
+  hypotheses: { id: 'H1' | 'H2'; label: string; score: number }[]
+  decision: {
+    action: string
+    cta: string
+    approvedStatus: string
+    reasoning: string[]
+    unknowns: string[]
+    confidence: number
+    alternative: string
+  }
+  chart: {
+    metric: string
+    big: string
+    bigUnit: string
+    values: number[]
+    max: number
+    threshold: number
+    thresholdLabel: string
+    markerAt: number
+    markerLabel: string
+    peakAt: number
+    peakLabel: string
+    recoverTo: number
+  }
+  followUps: { approved: DashEvent; rejected: DashEvent; asked: DashEvent; askLabel: string }
+}
+
+export const incidents: Incident[] = [
+  {
+    id: dashboard.incident,
+    title: dashboard.title,
+    service: 'checkout-api',
+    env: dashboard.env,
+    opened: dashboard.opened,
+    severity: 'SEV1',
+    selectedEvent: 'EVT-0412',
+    events: dashboard.events,
+    evidence: dashboard.evidence,
+    hypotheses: dashboard.hypotheses as Incident['hypotheses'],
+    decision: { ...dashboard.decision, cta: 'Approuver le rollback', approvedStatus: 'ROLLBACK APPROUVÉ', alternative: 'Ouvrir un ticket fournisseur et surveiller Stripe 15 min' },
+    chart: {
+      metric: 'p95 checkout-api',
+      big: '2.4',
+      bigUnit: 's',
+      values: dashboard.latency,
+      max: 2600,
+      threshold: 800,
+      thresholdLabel: 'SLO 800 ms',
+      markerAt: 7.3,
+      markerLabel: 'DEPLOY v2.14.3',
+      peakAt: 14,
+      peakLabel: 'pic 2 400 ms',
+      recoverTo: 330,
+    },
+    followUps: {
+      approved: { id: 'EVT-0415', time: '03:17:40', source: 'humain', label: 'Rollback approuvé par l\'opératrice', severity: 'info', detail: 'Décision journalisée. Exécution simulée, aucune action réelle.' },
+      rejected: { id: 'EVT-0415', time: '03:17:40', source: 'humain', label: 'Proposition rejetée, H2 rouverte', severity: 'warn', detail: 'L\'enquête repart sur l\'hypothèse fournisseur.' },
+      asked: { id: 'EVT-0416', time: '03:18:02', source: 'flowstate', label: 'Preuve demandée : test de charge', severity: 'info', detail: 'En attente d\'un résultat de test de charge sur v2.14.3.' },
+      askLabel: 'test de charge',
+    },
+  },
+  {
+    id: 'INC-2051',
+    title: 'Cascade de latence sur /search',
+    service: 'search-api',
+    env: 'prod · eu-west-3',
+    opened: '11:42:18',
+    severity: 'SEV2',
+    selectedEvent: 'EVT-0507',
+    events: [
+      { id: 'EVT-0503', time: '11:36:02', source: 'config-bot', label: 'Rotation de config cache-redis-02', severity: 'info', detail: 'Clé maxmemory modifiée : 8gb → 2gb (rotation automatique).' },
+      { id: 'EVT-0504', time: '11:37:40', source: 'redis', label: 'Hit ratio 94 % → 41 %', severity: 'warn', detail: '1 830 évictions par seconde sur cache-redis-02.' },
+      { id: 'EVT-0505', time: '11:39:12', source: 'otel-traces', label: 'search-api : appels DB ×3 par requête', severity: 'warn', detail: 'Les requêtes non cachées retombent sur la base.' },
+      { id: 'EVT-0506', time: '11:40:55', source: 'elastic', label: 'File d\'attente 1 204 requêtes', severity: 'warn', detail: '37 requêtes rejetées sur 5 minutes.' },
+      { id: 'EVT-0507', time: '11:42:18', source: 'prometheus', label: 'p95 /search 3,1 s (seuil 400 ms)', severity: 'crit', detail: 'Alerte SLO-search-latency déclenchée.' },
+      { id: 'EVT-0508', time: '11:43:01', source: 'nginx', label: 'Timeouts gateway 5 %', severity: 'crit', detail: '512 réponses 504 sur 5 minutes.' },
+    ],
+    evidence: [
+      { id: 'E1', kind: 'CONFIG', title: 'maxmemory abaissé à 2gb', excerpt: 'cache-redis-02: maxmemory 8gb → 2gb', confidence: 0.84, supports: 'H1' },
+      { id: 'E2', kind: 'METRICS', title: 'Évictions ×9 après rotation', excerpt: 'evicted_keys/s 200 → 1830', confidence: 0.79, supports: 'H1' },
+      { id: 'E3', kind: 'TRACES', title: 'Chaque étage amplifie le précédent', excerpt: 'search → db ×3 → elastic queue', confidence: 0.7, supports: 'H1' },
+      { id: 'E4', kind: 'TRAFFIC', title: 'Trafic organique +12 %', excerpt: 'rps 1 920 → 2 150', confidence: 0.3, supports: 'H2' },
+    ],
+    hypotheses: [
+      { id: 'H1', label: 'La rotation de config a réduit le cache et déclenché la cascade', score: 0.74 },
+      { id: 'H2', label: 'Pic de trafic organique', score: 0.26 },
+    ],
+    decision: {
+      action: 'Restaurer maxmemory=8gb sur cache-redis-02',
+      cta: 'Approuver la restauration',
+      approvedStatus: 'CONFIG RESTAURÉE',
+      reasoning: ['La cascade commence 98 s après la rotation', 'Mécanisme mesuré étage par étage', 'Changement réversible, sans déploiement'],
+      unknowns: ['La rotation a touché 2 clusters, un seul est observé', 'Le trafic +12 % contribue-t-il ?'],
+      confidence: 0.74,
+      alternative: 'Activer le rate-limit adaptatif sur /search',
+    },
+    chart: {
+      metric: 'p95 /search',
+      big: '3.1',
+      bigUnit: 's',
+      values: [180, 175, 190, 185, 182, 195, 240, 420, 760, 1240, 1810, 2380, 2760, 3020, 3104, 3050, 2990, 3080],
+      max: 3300,
+      threshold: 400,
+      thresholdLabel: 'SLO 400 ms',
+      markerAt: 5.4,
+      markerLabel: 'ROTATION CONFIG',
+      peakAt: 14,
+      peakLabel: 'pic 3 104 ms',
+      recoverTo: 190,
+    },
+    followUps: {
+      approved: { id: 'EVT-0509', time: '11:44:30', source: 'humain', label: 'Restauration de config approuvée', severity: 'info', detail: 'Décision journalisée. Exécution simulée, aucune action réelle.' },
+      rejected: { id: 'EVT-0509', time: '11:44:30', source: 'humain', label: 'Proposition rejetée, piste trafic ouverte', severity: 'warn', detail: 'L\'enquête repart sur l\'hypothèse de trafic.' },
+      asked: { id: 'EVT-0510', time: '11:45:02', source: 'flowstate', label: 'Preuve demandée : état du 2ᵉ cluster', severity: 'info', detail: 'En attente des métriques de cache-redis-03.' },
+      askLabel: 'état du 2ᵉ cluster',
+    },
+  },
+  {
+    id: 'INC-2049',
+    title: 'Erreurs 5xx après déploiement de orders',
+    service: 'orders-service',
+    env: 'prod · eu-west-3',
+    opened: '09:18:44',
+    severity: 'SEV1',
+    selectedEvent: 'EVT-0482',
+    events: [
+      { id: 'EVT-0480', time: '09:12:03', source: 'prometheus', label: 'orders-service : erreurs nominales 0,2 %', severity: 'info', detail: 'Ligne de base avant changement.' },
+      { id: 'EVT-0481', time: '09:14:10', source: 'argo-cd', label: 'Déploiement orders v5.2.0', severity: 'info', detail: 'Commit a91f3e2, 14 fichiers, canary 3 pods sur 8.' },
+      { id: 'EVT-0482', time: '09:14:48', source: 'sentry', label: 'NullPointer dans OrderMapper', severity: 'crit', detail: '2 311 occurrences, première 38 s après le déploiement.' },
+      { id: 'EVT-0483', time: '09:16:20', source: 'prometheus', label: '5xx 7,8 % sur 3 pods', severity: 'crit', detail: 'Les 5 pods restés en v5.1.9 sont sains.' },
+      { id: 'EVT-0484', time: '09:18:44', source: 'analytics', label: 'Paniers abandonnés +22 %', severity: 'warn', detail: 'Impact commercial mesuré sur 5 minutes.' },
+    ],
+    evidence: [
+      { id: 'E1', kind: 'DIFF', title: 'Champ optionnel non géré', excerpt: 'order.coupon.code  // coupon peut être null', confidence: 0.88, supports: 'H1' },
+      { id: 'E2', kind: 'LOGS', title: 'Stack trace dans le fichier modifié', excerpt: 'NPE at OrderMapper.java:142', confidence: 0.85, supports: 'H1' },
+      { id: 'E3', kind: 'METRICS', title: 'Seuls les pods v5.2.0 échouent', excerpt: '3/8 pods · 5xx 7,8 % vs 0,2 %', confidence: 0.81, supports: 'H1' },
+      { id: 'E4', kind: 'DB', title: 'Migration SQL partielle', excerpt: 'migration 0412 · 2/3 étapes', confidence: 0.22, supports: 'H2' },
+    ],
+    hypotheses: [
+      { id: 'H1', label: 'OrderMapper v5.2.0 ne gère pas un coupon absent', score: 0.88 },
+      { id: 'H2', label: 'Schéma de base migré partiellement', score: 0.12 },
+    ],
+    decision: {
+      action: 'Rollback orders-service vers v5.1.9',
+      cta: 'Approuver le rollback',
+      approvedStatus: 'ROLLBACK APPROUVÉ',
+      reasoning: ['Première erreur 38 s après le déploiement', 'Stack trace dans un fichier du commit', 'Les pods non mis à jour restent sains'],
+      unknowns: ['La migration SQL associée est-elle réversible ?', 'Canary ou incident : faut-il bloquer le pipeline ?'],
+      confidence: 0.88,
+      alternative: 'Désactiver le feature flag order-v2-mapper',
+    },
+    chart: {
+      metric: 'taux 5xx orders',
+      big: '7.8',
+      bigUnit: '%',
+      values: [0.2, 0.25, 0.2, 0.22, 0.18, 0.2, 0.3, 2.4, 5.1, 6.9, 7.6, 7.8, 7.7, 7.9, 7.8, 7.6, 7.8, 7.7],
+      max: 9,
+      threshold: 1,
+      thresholdLabel: 'SEUIL 1 %',
+      markerAt: 6.2,
+      markerLabel: 'DEPLOY v5.2.0',
+      peakAt: 13,
+      peakLabel: 'pic 7,9 %',
+      recoverTo: 0.2,
+    },
+    followUps: {
+      approved: { id: 'EVT-0485', time: '09:20:05', source: 'humain', label: 'Rollback v5.1.9 approuvé', severity: 'info', detail: 'Décision journalisée. Exécution simulée, aucune action réelle.' },
+      rejected: { id: 'EVT-0485', time: '09:20:05', source: 'humain', label: 'Rollback rejeté, flag envisagé', severity: 'warn', detail: 'L\'enquête explore la désactivation du feature flag.' },
+      asked: { id: 'EVT-0486', time: '09:20:40', source: 'flowstate', label: 'Preuve demandée : état de la migration', severity: 'info', detail: 'En attente du statut de la migration 0412.' },
+      askLabel: 'état de la migration',
+    },
+  },
+  {
+    id: 'INC-2053',
+    title: 'Accès anormal avec un jeton de service',
+    service: 'identity',
+    env: 'prod · eu-west-3',
+    opened: '04:12:51',
+    severity: 'SEV1',
+    selectedEvent: 'EVT-0522',
+    events: [
+      { id: 'EVT-0519', time: '02:05:12', source: 'secret-scan', label: 'Jeton svc-****9f dans un log CI public', severity: 'warn', detail: 'Dépôt infra-ci, ligne 212.' },
+      { id: 'EVT-0520', time: '04:02:33', source: 'audit-log', label: 'billing : appel depuis IP inconnue', severity: 'warn', detail: 'IP 203.0.113.42 absente de l\'inventaire.' },
+      { id: 'EVT-0521', time: '04:06:47', source: 'audit-log', label: 'users-api : lecture de 48 210 lignes', severity: 'crit', detail: 'Volume 40× supérieur à l\'usage normal du jeton.' },
+      { id: 'EVT-0522', time: '04:09:15', source: 's3', label: 'exports : 3 archives générées (1,2 Go)', severity: 'crit', detail: 'Archives créées hors des horaires habituels.' },
+      { id: 'EVT-0523', time: '04:12:51', source: 'audit-log', label: 'reports : jeton utilisé à 04:12', severity: 'warn', detail: 'Usage habituel : 09:00 – 19:00.' },
+    ],
+    evidence: [
+      { id: 'E1', kind: 'AUDIT', title: 'Même jeton dans 4 services', excerpt: 'token svc-****9f · billing, users, exports, reports', confidence: 0.83, supports: 'H1' },
+      { id: 'E2', kind: 'NETWORK', title: 'IP hors inventaire', excerpt: '203.0.113.42 · aucun asset connu', confidence: 0.8, supports: 'H1' },
+      { id: 'E3', kind: 'SECRET', title: 'Jeton exposé 2 h avant', excerpt: 'infra-ci/build.log:212', confidence: 0.86, supports: 'H1' },
+      { id: 'E4', kind: 'CRON', title: 'Job d\'export planifié ?', excerpt: 'cron exports-nightly · désactivé depuis mars', confidence: 0.18, supports: 'H2' },
+    ],
+    hypotheses: [
+      { id: 'H1', label: 'Jeton de service fuité via le log CI et réutilisé', score: 0.81 },
+      { id: 'H2', label: 'Job interne mal configuré', score: 0.19 },
+    ],
+    decision: {
+      action: 'Révoquer svc-****9f et bloquer 203.0.113.42',
+      cta: 'Approuver la révocation',
+      approvedStatus: 'JETON RÉVOQUÉ',
+      reasoning: ['Jeton exposé publiquement 2 h avant', 'IP inconnue, horaires anormaux', 'Volume de lecture 40× la normale'],
+      unknowns: ['Les archives ont-elles quitté le bucket ?', 'Le jeton a-t-il d\'autres scopes ?'],
+      confidence: 0.81,
+      alternative: 'Passer le jeton en lecture seule et surveiller 30 min',
+    },
+    chart: {
+      metric: 'lectures / min · svc-****9f',
+      big: '48k',
+      bigUnit: '',
+      values: [120, 140, 110, 130, 125, 118, 900, 6400, 18200, 31000, 44100, 48210, 39000, 22000, 9800, 4100, 2600, 1900],
+      max: 52000,
+      threshold: 2000,
+      thresholdLabel: 'NORMALE 2 000',
+      markerAt: 5.6,
+      markerLabel: 'PREMIER APPEL IP INCONNUE',
+      peakAt: 11,
+      peakLabel: 'pic 48 210',
+      recoverTo: 0,
+    },
+    followUps: {
+      approved: { id: 'EVT-0524', time: '04:14:02', source: 'humain', label: 'Révocation approuvée', severity: 'info', detail: 'Décision journalisée. Exécution simulée, aucune action réelle.' },
+      rejected: { id: 'EVT-0524', time: '04:14:02', source: 'humain', label: 'Révocation rejetée, surveillance renforcée', severity: 'warn', detail: 'Le jeton passe en lecture seule (simulation).' },
+      asked: { id: 'EVT-0525', time: '04:14:40', source: 'flowstate', label: 'Preuve demandée : sortie réseau du bucket', severity: 'info', detail: 'En attente des logs d\'egress S3.' },
+      askLabel: 'sortie réseau du bucket',
+    },
+  },
+]
+
+export const incidentById = (id: string) => incidents.find((i) => i.id === id)

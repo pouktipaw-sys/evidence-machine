@@ -1,0 +1,245 @@
+:root {
+  --ink: #080808;
+  --signal: #ff4d2d;
+  --bone: #f1ede5;
+  --silver: #c5c9ce;
+  --graphite: #242424;
+  --ink-2: #0f0f10;
+  --line: rgba(197, 201, 206, 0.18);
+  --line-2: rgba(197, 201, 206, 0.32);
+  --muted: rgba(241, 237, 229, 0.62);
+  --display: 'Syne Variable', 'Syne', 'Arial Black', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --gutter: clamp(16px, 3vw, 44px);
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--bone);
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+html,
+body {
+  /* clip, unlike hidden, keeps position: sticky working in Safari */
+  overflow-x: clip;
+}
+:root {
+  /* the visible viewport on phones (excludes the browser toolbars) */
+  --screen: 100vh;
+}
+@supports (height: 100svh) {
+  :root {
+    --screen: 100svh;
+  }
+}
+
+::selection {
+  background: var(--signal);
+  color: var(--ink);
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.skip {
+  position: fixed;
+  left: 12px;
+  top: -60px;
+  z-index: 100;
+  background: var(--signal);
+  color: var(--ink);
+  padding: 10px 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.skip:focus {
+  top: 12px;
+}
+
+/* ───── masks used by monumental type ───── */
+.mask {
+  display: block;
+  overflow: hidden;
+  padding: 0.06em 0.02em 0.02em;
+  margin: -0.06em -0.02em -0.02em;
+}
+.mask__in {
+  display: block;
+  will-change: transform;
+}
+
+/* ───── the fixed WebGL layer ───── */
+.gl-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: none;
+}
+.gl-stage canvas {
+  display: block;
+}
+.gl-stage.is-interactive {
+  pointer-events: auto;
+  cursor: grab;
+}
+.gl-stage.is-dragging {
+  cursor: grabbing;
+}
+
+/* ───── stacked sticky layers (back → canvas → front) ───── */
+.layer {
+  position: sticky;
+  top: 0;
+  height: var(--screen);
+  overflow: hidden;
+}
+.layer--back {
+  z-index: 0;
+}
+.layer--front {
+  z-index: 2;
+  margin-top: calc(var(--screen) * -1);
+  pointer-events: none;
+}
+.layer--front a,
+.layer--front button,
+.layer--front [data-interactive] {
+  pointer-events: auto;
+}
+
+/* opaque sections sit above the canvas */
+.section {
+  position: relative;
+  z-index: 3;
+}
+
+/* ───── buttons ───── */
+.btn {
+  --h: 52px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  height: var(--h);
+  padding: 0 22px;
+  border: 1px solid var(--line-2);
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.3s var(--ease),
+    color 0.3s var(--ease),
+    border-color 0.3s var(--ease);
+  white-space: nowrap;
+}
+.btn i {
+  font-style: normal;
+}
+.btn--primary {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: var(--ink);
+}
+.btn--primary:hover {
+  background: var(--bone);
+  border-color: var(--bone);
+}
+.btn--ghost {
+  background: rgba(8, 8, 8, 0.72);
+}
+.btn--ghost:hover,
+.btn--line:hover {
+  border-color: var(--bone);
+  background: var(--bone);
+  color: var(--ink);
+}
+.btn--line {
+  --h: 40px;
+  background: rgba(8, 8, 8, 0.6);
+}
+.btn--dark {
+  background: var(--ink);
+  color: var(--bone);
+  border-color: var(--ink);
+}
+.btn--dark:hover {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: var(--ink);
+}
+
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: 0 0 12px var(--signal);
+}
+
+/* ───── grain: one static tile, no GPU cost ───── */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  background-size: 180px;
+}
+
+/* ───── editorial micro-markers ───── */
+.mk {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
