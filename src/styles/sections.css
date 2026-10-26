@@ -2742,3 +2742,227 @@
     gap: 22px;
   }
 }
+
+/* ═════════ PROFIL ═════════ */
+.pf2 {
+  padding: clamp(90px, 14vh, 150px) var(--gutter);
+  background: var(--ink);
+  overflow: hidden;
+}
+.pf2__kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+}
+.pf2__title {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(30px, min(6.6vw, 13vh), 120px);
+  line-height: 0.86;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+.pf2__o {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--bone);
+}
+.pf2__title .mask:last-child .pf2__o {
+  color: var(--signal);
+  -webkit-text-stroke: 0;
+}
+.pf2__intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 48px;
+  margin-top: 48px;
+}
+.pf2__about {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(17px, 1.6vw, 23px);
+  line-height: 1.45;
+}
+.pf2__side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.pf2__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pf2__chips li {
+  padding: 6px 10px;
+  border: 1px solid var(--signal);
+  color: var(--signal);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+}
+.pf2__contact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.pf2__contact a {
+  color: var(--bone);
+  font-weight: 700;
+}
+.pf2__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.pf2__h {
+  margin: 80px 0 18px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--signal);
+}
+.pf2__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.pf2__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 190px;
+  padding: 24px 22px;
+  background: var(--ink);
+  text-decoration: none;
+  transition: background 0.25s;
+}
+a.pf2__card:hover {
+  background: #121212;
+}
+.pf2__card.is-ai {
+  background: #110b09;
+  box-shadow: inset 0 2px 0 var(--signal);
+}
+.pf2__badge {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  padding: 2px 7px;
+  background: var(--signal);
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.pf2__card h4 {
+  margin: 0;
+  padding-right: 40px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.15;
+}
+.pf2__card p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.pf2__stack {
+  margin-top: auto;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--silver);
+}
+.pf2__cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 48px;
+}
+.pf2__tl {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pf2__tl li {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 18px;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+.pf2__date {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+.pf2__kind {
+  margin: 0 0 4px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--signal);
+}
+.pf2__tl h4 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 18px;
+}
+.pf2__place {
+  margin: 2px 0 6px !important;
+  color: var(--silver) !important;
+}
+.pf2__tl p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.pf2__skills > div {
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+.pf2__skills span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.pf2__skills p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+@media (max-width: 759px) {
+  .pf2__title {
+    font-size: 6.4vw;
+  }
+  .pf2__intro,
+  .pf2__cols {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .pf2__grid {
+    grid-template-columns: 1fr;
+  }
+  .pf2__h {
+    margin-top: 56px;
+  }
+  .pf2__tl li {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}

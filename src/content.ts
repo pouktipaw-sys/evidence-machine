@@ -7,12 +7,14 @@
 export const person = {
   name: 'Morjiane Aït Mokhtar',
   nameUpper: 'MORJIANE AÏT MOKHTAR',
-  tagline: 'Développement, IA et curiosité appliquée.',
+  tagline: 'Développeuse, experte Claude et ChatGPT.',
+  email: 'morjiane.aitm@gmail.com',
+  city: 'Lyon',
 }
 
 export const links = {
   // TODO: remplacer par l'adresse de contact réelle
-  contact: 'mailto:?subject=Candidature%20%E2%80%94%20Morjiane%20A%C3%AFt%20Mokhtar',
+  contact: 'mailto:morjiane.aitm@gmail.com?subject=Candidature%20Smalk%20%E2%80%94%20Morjiane',
   // l'application FlowState AI (démo intégrée au site)
   flowstate: '#/app',
   portfolio: 'https://morjianeaitm.lovable.app',
@@ -298,4 +300,35 @@ export const smalk = {
     },
   ],
   geo: 'J\'ai appliqué FlowState à un cas de votre métier : une marque disparaît des réponses de Perplexity et de ChatGPT après une refonte de site. Les données sont fictives, les mécanismes sont réels : robots.txt, crawlers IA, sitemap, sources concurrentes.',
+}
+
+/* ───────────── Profil (source : CV) ───────────── */
+
+export const profile = {
+  headline: 'Développeuse. Experte Claude et ChatGPT.',
+  about:
+    'Diplômée d\'une Licence Informatique, je construis des applications de bout en bout, et je développe avec l\'IA au quotidien : Claude, Claude Code, ChatGPT et Codex. Je sais cadrer un modèle, le relier à des données réelles par MCP et vérifier ce qu\'il produit. J\'aime comprendre comment une technologie fonctionne, puis la transformer en outil concret.',
+  ai: ['Claude & Claude Code', 'ChatGPT & Codex', 'Serveurs MCP', 'Prompting structuré', 'Sorties LLM validées', 'Agents IA'],
+  built: [
+    { name: 'FlowState AI', what: 'Plateforme d\'enquête sur incidents : preuves citées, hypothèses, validation humaine, serveur MCP à 8 outils.', stack: 'Python · FastAPI · React · LLM · MCP', ai: true, href: links.repo },
+    { name: 'Application anti-gaspillage alimentaire', what: 'Application complète en Node.js pour lutter contre le gaspillage alimentaire.', stack: 'Node.js · Full-stack', ai: false },
+    { name: 'Sisterhood Journal', what: 'Application SaaS full-stack : architecture, gestion des données, déploiement, développement sécurisé.', stack: 'JavaScript · PHP · SQL', ai: false },
+    { name: 'Audit OWASP Juice Shop', what: 'Audit de sécurité contrôlé sous Docker/WSL2 : cartographie des endpoints, rapport avec preuves et recommandations.', stack: 'Docker · Burp Suite · OWASP', ai: false },
+    { name: 'MONEASY', what: 'Gestion de comptes et transactions en C++, architecture MVC, en binôme.', stack: 'C++ · POO · MVC', ai: false },
+    { name: 'The Evidence Machine', what: 'Ce site : candidature interactive et démo FlowState, construite avec Claude Code et Codex.', stack: 'React · TypeScript · GSAP', ai: true },
+  ],
+  education: [{ title: 'Licence Informatique', place: 'Université Lumière Lyon 2 · Bron', date: '2023 – 2026', detail: 'Programmation, bases de données, développement web, génie logiciel, réseaux, systèmes & Linux.' }],
+  experience: [
+    { title: 'Stagiaire développeuse web', place: 'La Maison des Parents · Saint-Fons', date: 'Mai – Juil. 2026', detail: 'Pages et fonctionnalités en HTML, CSS et JavaScript ; bases de données, tests et corrections.' },
+    { title: 'Internet Safety Evaluator', place: 'TELUS Digital · télétravail', date: 'Août 2025 – Fév. 2026', detail: 'Évaluation de contenus numériques selon des critères de qualité et de sécurité.' },
+    { title: 'Assistante d\'institut', place: 'Université Catholique de Lyon', date: 'Juil. – Août 2026', detail: 'Accompagnement des utilisateurs, résolution et suivi des demandes.' },
+    { title: 'Rédactrice de sujets d\'examen', place: 'UCLy · Lyon', date: 'Oct. 2025 – Juin 2026', detail: 'Préparation et adaptation de supports d\'examen.' },
+  ],
+  skills: [
+    ['Développement', 'JavaScript · Node.js · Python · PHP · SQL · C / C++ · Swift · HTML / CSS'],
+    ['IA', 'Claude · ChatGPT · Claude Code · Codex · MCP'],
+    ['Cybersécurité', 'OWASP · Burp Suite · Nmap · Wireshark · TryHackMe / HTB'],
+    ['Systèmes', 'Linux · Docker / WSL2 · TCP/IP · DNS · HTTP · Bash · PowerShell'],
+  ],
+  languages: 'Français natif · Espagnol B2 · Anglais B1',
 }

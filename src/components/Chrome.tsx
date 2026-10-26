@@ -11,6 +11,7 @@ const SECTIONS: [string, string][] = [
   ['lab', 'Investigation Room'],
   ['xray', 'X-Ray'],
   ['method', 'Méthode'],
+  ['profil', 'Profil'],
   ['projects', 'Artefacts'],
   ['smalk', 'Pour Smalk'],
   ['finale', 'Contact'],

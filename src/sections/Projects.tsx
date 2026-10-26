@@ -184,7 +184,7 @@ export function Projects() {
   return (
     <div id="projects" ref={root} className="projects">
       <header className="projects__intro section">
-        <Transition kind="blinds" from="var(--bone)" />
+        <Transition kind="frame" from="var(--ink)" />
         <p className="mk">Autres projets · artefacts</p>
         <p className="projects__lead">Trois projets, trois objets. Aucun ne ressemble aux autres, parce qu'aucun ne résout le même problème.</p>
       </header>

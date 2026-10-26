@@ -10,6 +10,7 @@ import { Method } from './sections/Method'
 import { Projects } from './sections/Projects'
 import { Finale } from './sections/Finale'
 import { Smalk } from './sections/Smalk'
+import { Profile } from './sections/Profile'
 import { Nav, Cursor, BuildNotes } from './components/Chrome'
 import { FlowStateApp } from './app/FlowStateApp'
 import './styles/app.css'
@@ -95,6 +96,7 @@ export function App() {
         <IncidentLab />
         <XRay />
         <Method />
+        <Profile />
         <Projects />
         <Smalk />
         <Finale />
